@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <title>Chat</title>
     <style>
         body {
@@ -14,7 +15,7 @@
         }
 
         #form {
-            background: rgba(0, 0, 0, 0.15);
+            background: rgba(125, 37, 85, 0.15);
             padding: 0.25rem;
             position: fixed;
             bottom: 0;
@@ -25,8 +26,19 @@
             box-sizing: border-box;
             backdrop-filter: blur(10px);
         }
+        #form2 {
+            background: rgba(125, 37, 85, 0.15);
+            padding: 0.25rem;
+            position: fixed;
+            left: 0;
+            right: 0;
+            display: flex;
+            height: 3rem;
+            box-sizing: border-box;
+            backdrop-filter: blur(10px);
+        }
 
-        #input {
+        input {
             border: none;
             padding: 0 1rem;
             flex-grow: 1;
@@ -34,12 +46,12 @@
             margin: 0.25rem;
         }
 
-        #input:focus {
+        input:focus {
             outline: none;
         }
 
-        #form>button {
-            background: #333;
+        form>button {
+            background: rgb(86, 49, 68);
             border: none;
             padding: 0 1rem;
             margin: 0.25rem;
@@ -59,20 +71,24 @@
         }
 
         #messages>li:nth-child(odd) {
-            background: #efefef;
+            background: #b284952a;
         }
     </style>
 </head>
 
 <body>
-    <ul id="messages"></ul>
-    
     <form id="form2" action="">
-        <input id="inputnick" autocomplete="off" /><button>Salvar Nick</button>
+    <input id="inputnick" autocomplete="off" /><button>Salvar Nick</button>
     </form>
 
+    <div class="col-sm-8 col-xs-12 chat" style="padding-top: 5%;" tabindex="5001">
+    <ul id="messages"></ul>
+    </div>
+    
+
     <form id="form" action="">
-        <input id="input" autocomplete="off" /><button>Send</button>
+        <input id="input" autocomplete="off" /><button>Enviar</button>
+        
     </form>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -82,6 +98,26 @@
         var formnick = document.getElementById('form2');
         var input = document.getElementById('input');
         var inputnick = document.getElementById('inputnick');
+
+       var typing = false;
+        var timeout = undefined;
+
+        function timeoutFunction() {
+            typing = false;
+            socket.emit('digitacao', ' parou de digitar');
+        }
+
+        input.addEventListener('keyup', (e) => {
+            if (typing == false) {
+                typing = true
+                socket.emit('digitacao', ' está digitando');
+                timeout = setTimeout(timeoutFunction, 1500);
+            } else {
+                clearTimeout(timeout);
+                timeout = setTimeout(timeoutFunction, 1500);
+            }
+
+        });
 
         formnick.addEventListener('submit', function (e) {
             e.preventDefault();
@@ -102,7 +138,26 @@
         socket.on('chat message', function(msg) {
             console.log('chegou uma msg ' + msg)
             var item = document.createElement('li');
-            item.textContent = msg;
+            item.innerHTML =  '<i class="fa fa-comment"></i>  '+msg;
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+        socket.on('digitacao', function(msg) {
+            var item = document.createElement('li');
+            item.innerHTML = '<i class="fa-solid fa-ellipsis"></i>  ' + msg;
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+        socket.on('conexao', function(msg) {
+            var item = document.createElement('li');
+            item.innerHTML = '<i class="fa-solid fa-user-plus"></i>  ' + msg;
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        socket.on('desconexao', function(msg) {
+            var item = document.createElement('li');
+            item.innerHTML = '<i class="fa-solid fa-user-xmark"></i>  ' + msg;
             messages.appendChild(item);
             window.scrollTo(0, document.body.scrollHeight);
         });

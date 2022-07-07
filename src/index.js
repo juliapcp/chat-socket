@@ -8,15 +8,14 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/meu.html');
+  res.sendFile(__dirname + '/chat.html');
 });
 
 io.on('connection', (socket) => {
     socket.client.nick = socket.client.id;
-    console.log('a user connected');
+    io.emit('conexao', socket.client.nick + " entrou no chat");
 
     socket.on('chat message', (msg) => {
-        console.log('sid: ' + socket.client.id + '\tmessage: ' + msg);
         io.emit('chat message', socket.client.nick + " disse: " + msg);
     });
 
@@ -26,8 +25,13 @@ io.on('connection', (socket) => {
         socket.client.nick = msg;
     })
 
+    socket.on('digitacao', (msg) => {
+      console.log(msg)
+      io.emit('digitacao', `${socket.client.nick} ${msg}`);
+    })
+
     socket.on('disconnect', () => {
-        console.log('user disconnected');
+      io.emit('desconexao', socket.client.nick + " saiu do chat");
     });
 });
 
