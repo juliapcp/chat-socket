@@ -78,7 +78,7 @@
 
 <body>
     <form id="form2" action="">
-    <input id="inputnick" autocomplete="off" /><button>Salvar Nick</button>
+    <input id="inputnick" autocomplete="off" /><button>Sallet Nick</button>
     </form>
 
     <div class="col-sm-8 col-xs-12 chat" style="padding-top: 5%;" tabindex="5001">
@@ -90,26 +90,28 @@
         <input id="input" autocomplete="off" /><button>Enviar</button>
         
     </form>
+    <p hidden id="digitando">Teste</p>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        var socket = io();
-        var form = document.getElementById('form');
-        var formnick = document.getElementById('form2');
-        var input = document.getElementById('input');
-        var inputnick = document.getElementById('inputnick');
-
-       var typing = false;
-        var timeout = undefined;
+        let socket = io();
+        let form = document.getElementById('form');
+        let formnick = document.getElementById('form2');
+        let input = document.getElementById('input');
+        let inputnick = document.getElementById('inputnick');
+        let messages = document.getElementById('messages');
+        let digitando = false;
+        let timeout = undefined;
 
         function timeoutFunction() {
-            typing = false;
-            socket.emit('digitacao', ' parou de digitar');
+            digitando = false;
+            socket.emit('parou digitacao', 'parou digitacao');
         }
 
         input.addEventListener('keyup', (e) => {
-            if (typing == false) {
-                typing = true
+            let elementDigitando = document.getElementById('digitando');
+            if (digitando == false) {
+                digitando = true
                 socket.emit('digitacao', ' está digitando');
                 timeout = setTimeout(timeoutFunction, 1500);
             } else {
@@ -134,29 +136,39 @@
             }
         });
 
-        const messages = document.getElementById('messages');
         socket.on('chat message', function(msg) {
-            console.log('chegou uma msg ' + msg)
-            var item = document.createElement('li');
+            let item = document.createElement('li');
             item.innerHTML =  '<i class="fa fa-comment"></i>  '+msg;
             messages.appendChild(item);
             window.scrollTo(0, document.body.scrollHeight);
         });
+
         socket.on('digitacao', function(msg) {
-            var item = document.createElement('li');
-            item.innerHTML = '<i class="fa-solid fa-ellipsis"></i>  ' + msg;
-            messages.appendChild(item);
+            let elementDigitando = document.getElementById('digitando');
+            elementDigitando.innerHTML = msg;
+            elementDigitando.hidden = false;
             window.scrollTo(0, document.body.scrollHeight);
         });
+
+        socket.on('parou digitacao', function(msg) {
+            let elementDigitando = document.getElementById('digitando');
+            elementDigitando.hidden = true;
+        });
+
+        socket.on('parou digitacao', function(msg) {
+            let elementDigitando = document.getElementById('digitando');
+            elementDigitando.hidden = true;
+        });
+
         socket.on('conexao', function(msg) {
-            var item = document.createElement('li');
+            let item = document.createElement('li');
             item.innerHTML = '<i class="fa-solid fa-user-plus"></i>  ' + msg;
             messages.appendChild(item);
             window.scrollTo(0, document.body.scrollHeight);
         });
 
         socket.on('desconexao', function(msg) {
-            var item = document.createElement('li');
+            let item = document.createElement('li');
             item.innerHTML = '<i class="fa-solid fa-user-xmark"></i>  ' + msg;
             messages.appendChild(item);
             window.scrollTo(0, document.body.scrollHeight);

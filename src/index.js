@@ -26,8 +26,11 @@ io.on('connection', (socket) => {
     })
 
     socket.on('digitacao', (msg) => {
-      console.log(msg)
       io.emit('digitacao', `${socket.client.nick} ${msg}`);
+    })
+
+    socket.on('parou digitacao', (msg) => {
+      io.emit('parou digitacao', `${socket.client.nick} ${msg}`);
     })
 
     socket.on('disconnect', () => {
